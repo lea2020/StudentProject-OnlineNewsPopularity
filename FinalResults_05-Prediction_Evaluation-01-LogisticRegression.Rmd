@@ -1,0 +1,131 @@
+---
+title: "FinalResults_05-Prediction_Evaluation-01-LogisticRegression"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Predicting Online News Popularity based on Pre-publication Features
+
+Final Results and Code
+
+
+Step 5 - Prediction & Step 6 - Performance Evaluation
+
+Prediction: Classification models - Logistic Regression, K-Nearest Neighbours, Decision Trees, Random Forest, and Gradient Boosting Machine - are tested to find the algorithm with the best accuracy. 
+
+Performance Evaluation: At this stage, the machine learning algorithms that have been run are evaluated using various methods. Several metrics are computed including Accuracy, Precision, Recall/Sensitivity, Specificity, and F1, depending on the Confusion Matrix. 
+
+Note the results found are similar to what has been found in the literature.
+
+
+Logistic Regression
+
+```{r }
+#Reload the data
+train.set <- read.csv(file = "trainset.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                      na.strings = c("", "NA"))
+
+valid.set <- read.csv(file = "validset.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                      na.strings = c("", "NA"))
+
+test.set <- read.csv(file = "testset.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                     na.strings = c("", "NA"))
+
+train <- read.csv(file = "train.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                  na.strings = c("", "NA"))
+
+test <- read.csv(file = "test.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                 na.strings = c("", "NA"))
+
+#Remove the index column
+train.set <- train.set[2:28]
+valid.set <- valid.set[2:28]
+test.set <- test.set[2:28]
+train <- train[2:28]
+test <- test[2:28]
+```
+
+```{r }
+#Change the categorical variables back to factor to conduct model training and testing
+train.set$data_channel_is_entertainment <- as.factor(train.set$data_channel_is_entertainment)
+train.set$data_channel_is_socmed <- as.factor(train.set$data_channel_is_socmed)
+train.set$weekday_is_saturday <- as.factor(train.set$weekday_is_saturday)
+train.set$weekday_is_sunday <- as.factor(train.set$weekday_is_sunday)
+train.set$shares_cat <- as.factor(train.set$shares_cat)
+
+valid.set$data_channel_is_entertainment <- as.factor(valid.set$data_channel_is_entertainment)
+valid.set$data_channel_is_socmed <- as.factor(valid.set$data_channel_is_socmed)
+valid.set$weekday_is_saturday <- as.factor(valid.set$weekday_is_saturday)
+valid.set$weekday_is_sunday <- as.factor(valid.set$weekday_is_sunday)
+valid.set$shares_cat <- as.factor(valid.set$shares_cat)
+
+test.set$data_channel_is_entertainment <- as.factor(test.set$data_channel_is_entertainment)
+test.set$data_channel_is_socmed <- as.factor(test.set$data_channel_is_socmed)
+test.set$weekday_is_saturday <- as.factor(test.set$weekday_is_saturday)
+test.set$weekday_is_sunday <- as.factor(test.set$weekday_is_sunday)
+test.set$shares_cat <- as.factor(test.set$shares_cat)
+
+train$data_channel_is_entertainment <- as.factor(train$data_channel_is_entertainment)
+train$data_channel_is_socmed <- as.factor(train$data_channel_is_socmed)
+train$weekday_is_saturday <- as.factor(train$weekday_is_saturday)
+train$weekday_is_sunday <- as.factor(train$weekday_is_sunday)
+train$shares_cat <- as.factor(train$shares_cat)
+
+test$data_channel_is_entertainment <- as.factor(test$data_channel_is_entertainment)
+test$data_channel_is_socmed <- as.factor(test$data_channel_is_socmed)
+test$weekday_is_saturday <- as.factor(test$weekday_is_saturday)
+test$weekday_is_sunday <- as.factor(test$weekday_is_sunday)
+test$shares_cat <- as.factor(test$shares_cat)
+```
+
+```{r }
+#For logistic regression, there are no tuning parameters
+#Fit the logistic regression model on the training set using 10-fold cross-validation
+set.seed(123)
+glm_model <- glm(shares_cat ~ ., family = binomial(link='logit'), data = train)
+
+#Print the output of the model
+summary(glm_model)
+```
+
+The coefficients of the predictors indicate that every one unit change in the independent variable produces a specific unit change in the log odds of the dependent variable i.e. the log odds of an article being popular.
+The largest impact is from the rate of unique non-stop words in the content, followed by closeness to LDA topics 0, 4, 3, 1, and 2 which all have a negative relationship with the log odds of an article being popular.
+
+Most of the estimates are statistically significant and the model produces the following relationship between the log odds of popularity and the predictors (i.e. the independent variables that have a significant effect on the dependent variable):
+
+logit(p) = 601.45 + 7.81(maximum shares of average keyword) + 6.38(minimum shares of referenced articles in                    Mashable) - 557.22(closeness to LDA topic 0) + 0.42(minimum shares of the average keyword)
+           - 554.06(closeness to LDA topic 2) + 0.94(article published on Saturday)
+           - 557.2(closeness to LDA topic 4) + 0.82(data channel is social media)
+           - 0.57(data channel is entertainment) - 556.97(closeness to LDA topic 1)
+           - 557.04(closeness to LDA topic 3) - 591.39(rate of unique non-stop words in the content)
+           + 2.8(number of links) - 0.26(maximum shares of best keyword) + 0.44(number of images)
+           - 0.24(average shares of the best keyword) + 0.73(article published on Sunday)
+           - 0.63(average length of the words in the content) + 1.48(text subjectivity) + 0.43(title polarity)
+
+Furthermore, the residual deviance is found to be better than the null deviance.
+
+```{r }
+#Plot the results
+plot(glm_model)
+```
+
+```{r }
+#Analyze the table of deviance
+anova(glm_model, test = "Chisq")
+```
+
+For most of the variables in the model, there is a drop in deviance when adding each variable at a time.
+
+```{r }
+#Make a prediction on the test set
+glm_prediction<-predict(glm_model, test, type = "response")
+glm_pred_results <- as.factor(ifelse(glm_prediction > 0.5,1,0))
+
+#Confusion Matrix and Statistics
+library(caret)
+glm_ConfusionMatrix_stats = confusionMatrix(glm_pred_results, test$shares_cat, mode = "everything", positive = "1")
+print(glm_ConfusionMatrix_stats)
+```
