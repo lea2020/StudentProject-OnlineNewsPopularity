@@ -1,0 +1,220 @@
+---
+title: "FinalResults_05-Prediction_Evaluation-05-GradientBoostingMachine"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Predicting Online News Popularity based on Pre-publication Features
+
+Final Results and Code
+
+
+Step 5 - Prediction & Step 6 - Performance Evaluation
+
+Prediction: Classification models - Logistic Regression, K-Nearest Neighbours, Decision Trees, Random Forest, and Gradient Boosting Machine - are tested to find the algorithm with the best accuracy. 
+
+Performance Evaluation: At this stage, the machine learning algorithms that have been run are evaluated using various methods. Several metrics are computed including Accuracy, Precision, Recall/Sensitivity, Specificity, and F1, depending on the Confusion Matrix. 
+
+Note the results found are similar to what has been found in the literature.
+
+
+Gradient Boosting Machine
+
+```{r }
+#Reload the data
+train.set <- read.csv(file = "trainset.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                      na.strings = c("", "NA"))
+
+valid.set <- read.csv(file = "validset.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                      na.strings = c("", "NA"))
+
+test.set <- read.csv(file = "testset.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                     na.strings = c("", "NA"))
+
+train <- read.csv(file = "train.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                  na.strings = c("", "NA"))
+
+test <- read.csv(file = "test.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                 na.strings = c("", "NA"))
+
+#Remove the index column
+train.set <- train.set[2:28]
+valid.set <- valid.set[2:28]
+test.set <- test.set[2:28]
+train <- train[2:28]
+test <- test[2:28]
+```
+
+```{r }
+#Change the categorical variables back to factor to conduct model training and testing
+train.set$data_channel_is_entertainment <- as.factor(train.set$data_channel_is_entertainment)
+train.set$data_channel_is_socmed <- as.factor(train.set$data_channel_is_socmed)
+train.set$weekday_is_saturday <- as.factor(train.set$weekday_is_saturday)
+train.set$weekday_is_sunday <- as.factor(train.set$weekday_is_sunday)
+train.set$shares_cat <- as.factor(train.set$shares_cat)
+
+valid.set$data_channel_is_entertainment <- as.factor(valid.set$data_channel_is_entertainment)
+valid.set$data_channel_is_socmed <- as.factor(valid.set$data_channel_is_socmed)
+valid.set$weekday_is_saturday <- as.factor(valid.set$weekday_is_saturday)
+valid.set$weekday_is_sunday <- as.factor(valid.set$weekday_is_sunday)
+valid.set$shares_cat <- as.factor(valid.set$shares_cat)
+
+test.set$data_channel_is_entertainment <- as.factor(test.set$data_channel_is_entertainment)
+test.set$data_channel_is_socmed <- as.factor(test.set$data_channel_is_socmed)
+test.set$weekday_is_saturday <- as.factor(test.set$weekday_is_saturday)
+test.set$weekday_is_sunday <- as.factor(test.set$weekday_is_sunday)
+test.set$shares_cat <- as.factor(test.set$shares_cat)
+
+train$data_channel_is_entertainment <- as.factor(train$data_channel_is_entertainment)
+train$data_channel_is_socmed <- as.factor(train$data_channel_is_socmed)
+train$weekday_is_saturday <- as.factor(train$weekday_is_saturday)
+train$weekday_is_sunday <- as.factor(train$weekday_is_sunday)
+train$shares_cat <- as.factor(train$shares_cat)
+
+test$data_channel_is_entertainment <- as.factor(test$data_channel_is_entertainment)
+test$data_channel_is_socmed <- as.factor(test$data_channel_is_socmed)
+test$weekday_is_saturday <- as.factor(test$weekday_is_saturday)
+test$weekday_is_sunday <- as.factor(test$weekday_is_sunday)
+test$shares_cat <- as.factor(test$shares_cat)
+```
+
+```{r }
+#install.packages("gbm")
+library(gbm)
+
+#Train the model with different tuning parameters
+library(caret)
+set.seed(123)
+gbmfit <- train(shares_cat ~., data = train.set, method = "gbm", tuneLength = 5, 
+                trControl = trainControl(method = "cv", search = "grid"), verbose = FALSE, 
+                distribution = "bernoulli")
+
+#Print the training model to see the accuracy
+print(gbmfit)
+```
+
+```{r }
+#Plot the results
+plot(gbmfit)
+```
+
+Since the response only has 2 unique values (0,1), a bernoulli distribution should be specified.
+
+Change the categorical variables to numeric instead of factor to get (0,1) observations in order to use the bernoulli distribution in the gbm() function.
+
+```{r }
+train2 <- train
+test2 <- test
+train.set2 <- train.set
+valid.set2 <- valid.set
+test.set2 <- test.set
+
+train2$shares_cat <- as.numeric(levels(train2$shares_cat))[as.integer(train2$shares_cat)]
+train2$weekday_is_saturday <- as.numeric(levels(train2$weekday_is_saturday))[as.integer(train2$weekday_is_saturday)]
+train2$weekday_is_sunday <- as.numeric(levels(train2$weekday_is_sunday))[as.integer(train2$weekday_is_sunday)]
+train2$data_channel_is_socmed <- as.numeric(levels(train2$data_channel_is_socmed))[as.integer(train2$data_channel_is_socmed)]
+train2$data_channel_is_entertainment <- as.numeric(levels(train2$data_channel_is_entertainment))[as.integer(train2$data_channel_is_entertainment)]
+
+test2$shares_cat <- as.numeric(levels(test2$shares_cat))[as.integer(test2$shares_cat)]
+test2$weekday_is_saturday <- as.numeric(levels(test2$weekday_is_saturday))[as.integer(test2$weekday_is_saturday)]
+test2$weekday_is_sunday <- as.numeric(levels(test2$weekday_is_sunday))[as.integer(test2$weekday_is_sunday)]
+test2$data_channel_is_socmed <- as.numeric(levels(test2$data_channel_is_socmed))[as.integer(test2$data_channel_is_socmed)]
+test2$data_channel_is_entertainment <- as.numeric(levels(test2$data_channel_is_entertainment))[as.integer(test2$data_channel_is_entertainment)]
+
+train.set2$shares_cat <- as.numeric(levels(train.set2$shares_cat))[as.integer(train.set2$shares_cat)]
+train.set2$weekday_is_saturday <- as.numeric(levels(train.set2$weekday_is_saturday))[as.integer(train.set2$weekday_is_saturday)]
+train.set2$weekday_is_sunday <- as.numeric(levels(train.set2$weekday_is_sunday))[as.integer(train.set2$weekday_is_sunday)]
+train.set2$data_channel_is_socmed <- as.numeric(levels(train.set2$data_channel_is_socmed))[as.integer(train.set2$data_channel_is_socmed)]
+train.set2$data_channel_is_entertainment <- as.numeric(levels(train.set2$data_channel_is_entertainment))[as.integer(train.set2$data_channel_is_entertainment)]
+
+test.set2$shares_cat <- as.numeric(levels(test.set2$shares_cat))[as.integer(test.set2$shares_cat)]
+test.set2$weekday_is_saturday <- as.numeric(levels(test.set2$weekday_is_saturday))[as.integer(test.set2$weekday_is_saturday)]
+test.set2$weekday_is_sunday <- as.numeric(levels(test.set2$weekday_is_sunday))[as.integer(test.set2$weekday_is_sunday)]
+test.set2$data_channel_is_socmed <- as.numeric(levels(test.set2$data_channel_is_socmed))[as.integer(test.set2$data_channel_is_socmed)]
+test.set2$data_channel_is_entertainment <- as.numeric(levels(test.set2$data_channel_is_entertainment))[as.integer(test.set2$data_channel_is_entertainment)]
+
+valid.set2$shares_cat <- as.numeric(levels(valid.set2$shares_cat))[as.integer(valid.set2$shares_cat)]
+valid.set2$weekday_is_saturday <- as.numeric(levels(valid.set2$weekday_is_saturday))[as.integer(valid.set2$weekday_is_saturday)]
+valid.set2$weekday_is_sunday <- as.numeric(levels(valid.set2$weekday_is_sunday))[as.integer(valid.set2$weekday_is_sunday)]
+valid.set2$data_channel_is_socmed <- as.numeric(levels(valid.set2$data_channel_is_socmed))[as.integer(valid.set2$data_channel_is_socmed)]
+valid.set2$data_channel_is_entertainment <- as.numeric(levels(valid.set2$data_channel_is_entertainment))[as.integer(valid.set2$data_channel_is_entertainment)]
+```
+
+Create a GBM model with the validation set using the best parameters. The final values found for the model were n.trees = 250, interaction.depth = 4, shrinkage = 0.1, and n.minobsinnode = 10 where n.trees is the number of trees, interaction.depth is is the maximum depth of each tree, shrinkage is the learning rate applied to each tree in the expansion, and n.minobsinnode is the number of observations in the terminal nodes of the trees.
+
+```{r }
+set.seed(123)
+gbm_model <- gbm(shares_cat ~., data = valid.set2, n.trees = 250, interaction.depth = 4, shrinkage = 0.1, 
+                 n.minobsinnode = 10, distribution = "bernoulli")
+
+#Print the model
+print(gbm_model)
+```
+
+```{r }
+#Make predictions using the test data
+gbm_predict <- predict(object = gbm_model, newdata = test.set2, n.trees = 250, type = "response")
+
+#Create binary observations from the predictions
+#Use the ifelse() function to predict if an article is popular with a percentage/probability greater than 50%
+gbm_predict_binary <- as.factor(ifelse(gbm_predict > 0.5, 1, 0))
+test.set2$shares_cat <- as.factor(test.set2$shares_cat)
+
+#Confusion Matrix and Statistics
+gbm_confusionMatrix_stats <- confusionMatrix(gbm_predict_binary, test.set2$shares_cat, positive = "1", 
+                                             mode = "everything")
+print(gbm_confusionMatrix_stats)
+```
+
+
+Using 10-fold cross-validation
+
+```{r }
+#Define the GBM model and use the training data to fit the model
+set.seed(123)
+gbm_model2 <- gbm(shares_cat ~., data = train2, n.trees = 250, interaction.depth = 4, shrinkage = 0.1, 
+                  n.minobsinnode = 10, distribution = "bernoulli")
+
+#Print the model
+print(gbm_model2)
+```
+
+```{r }
+#Plot the results (marginal plot of fitted GBM objects)
+plot(gbm_model2)
+```
+
+The marginal plot shows the marginal effect between the maximum shares of the average keyword and the dependent
+variable, popularity of an article.
+
+This plot suggests there is a greater postive effect at the bottom 20% of the distribution of maximum shares of the average keyword.
+
+```{r }
+#Important variables
+set.seed(123)
+summary(gbm_model2)
+```
+
+```{r }
+#install.packages("vip")
+library(vip)
+set.seed(123)
+vip(gbm_model2, num_features = 26L)
+```
+
+```{r }
+#Make predictions using the test data
+gbm_predict2 <- predict.gbm(gbm_model2, newdata = test2, type = "response", n.trees = 250)
+
+#Create binary variables from predictions
+gbm_predict_binary2 <- as.factor(ifelse(gbm_predict2 > 0.5, 1, 0))
+test2$shares_cat <- as.factor(test2$shares_cat)
+
+#Confusion Matrix and Stats
+gbm_ConfusionMatrix_stats2 <- confusionMatrix(gbm_predict_binary2, test2$shares_cat, positive = "1", 
+                                              mode = "everything")
+print(gbm_ConfusionMatrix_stats2)
+```
