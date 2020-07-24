@@ -1,0 +1,145 @@
+---
+title: "FinalResults_05-Prediction_Evaluation-03-DecisionTrees"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Predicting Online News Popularity based on Pre-publication Features
+
+Final Results and Code
+
+
+Step 5 - Prediction & Step 6 - Performance Evaluation
+
+Prediction: Classification models - Logistic Regression, K-Nearest Neighbours, Decision Trees, Random Forest, and Gradient Boosting Machine - are tested to find the algorithm with the best accuracy. 
+
+Performance Evaluation: At this stage, the machine learning algorithms that have been run are evaluated using various methods. Several metrics are computed including Accuracy, Precision, Recall/Sensitivity, Specificity, and F1, depending on the Confusion Matrix. 
+
+Note the results found are similar to what has been found in the literature.
+
+
+Decision Trees
+
+```{r }
+#Reload the data
+train.set <- read.csv(file = "trainset.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                      na.strings = c("", "NA"))
+
+valid.set <- read.csv(file = "validset.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                      na.strings = c("", "NA"))
+
+test.set <- read.csv(file = "testset.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                     na.strings = c("", "NA"))
+
+train <- read.csv(file = "train.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                  na.strings = c("", "NA"))
+
+test <- read.csv(file = "test.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                 na.strings = c("", "NA"))
+
+#Remove the index column
+train.set <- train.set[2:28]
+valid.set <- valid.set[2:28]
+test.set <- test.set[2:28]
+train <- train[2:28]
+test <- test[2:28]
+```
+
+```{r }
+#Change the categorical variables back to factor to conduct model training and testing
+train.set$data_channel_is_entertainment <- as.factor(train.set$data_channel_is_entertainment)
+train.set$data_channel_is_socmed <- as.factor(train.set$data_channel_is_socmed)
+train.set$weekday_is_saturday <- as.factor(train.set$weekday_is_saturday)
+train.set$weekday_is_sunday <- as.factor(train.set$weekday_is_sunday)
+train.set$shares_cat <- as.factor(train.set$shares_cat)
+
+valid.set$data_channel_is_entertainment <- as.factor(valid.set$data_channel_is_entertainment)
+valid.set$data_channel_is_socmed <- as.factor(valid.set$data_channel_is_socmed)
+valid.set$weekday_is_saturday <- as.factor(valid.set$weekday_is_saturday)
+valid.set$weekday_is_sunday <- as.factor(valid.set$weekday_is_sunday)
+valid.set$shares_cat <- as.factor(valid.set$shares_cat)
+
+test.set$data_channel_is_entertainment <- as.factor(test.set$data_channel_is_entertainment)
+test.set$data_channel_is_socmed <- as.factor(test.set$data_channel_is_socmed)
+test.set$weekday_is_saturday <- as.factor(test.set$weekday_is_saturday)
+test.set$weekday_is_sunday <- as.factor(test.set$weekday_is_sunday)
+test.set$shares_cat <- as.factor(test.set$shares_cat)
+
+train$data_channel_is_entertainment <- as.factor(train$data_channel_is_entertainment)
+train$data_channel_is_socmed <- as.factor(train$data_channel_is_socmed)
+train$weekday_is_saturday <- as.factor(train$weekday_is_saturday)
+train$weekday_is_sunday <- as.factor(train$weekday_is_sunday)
+train$shares_cat <- as.factor(train$shares_cat)
+
+test$data_channel_is_entertainment <- as.factor(test$data_channel_is_entertainment)
+test$data_channel_is_socmed <- as.factor(test$data_channel_is_socmed)
+test$weekday_is_saturday <- as.factor(test$weekday_is_saturday)
+test$weekday_is_sunday <- as.factor(test$weekday_is_sunday)
+test$shares_cat <- as.factor(test$shares_cat)
+```
+
+```{r }
+#install.packages("party")
+library("party")
+
+#Tune the model based on mincriterion - the minimum value of the test statistic (1 - p-value)
+library(caret)
+set.seed(123)
+ctreefit <- train(shares_cat ~., data = train.set, method = "ctree", tuneLength = 6, 
+                  trControl = trainControl(method = "cv", search = "grid"))
+
+#Print the training model to see the accuracy
+print(ctreefit)
+```
+
+```{r }
+#Plot the results
+plot(ctreefit)
+```
+
+The most accurate predictions were made with mincriterion = 0.794
+Since mincriterion = 0.99 is very close in accuracy, this value may be chosen for the model since mincriterion is determined by the p-value.
+
+```{r }
+#Prune the tree changing the control parameter to mincriterion = 0.99
+#Run the model on the validation set
+set.seed(123)
+ctree_pruned <- ctree(shares_cat ~ ., data = valid.set, controls = ctree_control(mincriterion = 0.99))
+
+#Make a prediction on the test set
+ctree_pruned_prediction <- predict(ctree_pruned, test.set)
+
+#Confusion Matrix and Statistics
+ctree_pruned_ConfusionMatrix_stats = confusionMatrix(ctree_pruned_prediction, test.set$shares_cat,
+                                                     mode = "everything", positive = "1")
+print(ctree_pruned_ConfusionMatrix_stats)
+```
+
+
+Using 10-fold cross-validation
+
+```{r }
+#Create a decision tree model on the training set using the best parameters
+set.seed(123)
+ctree_model <- ctree(shares_cat ~. , data = train, controls = ctree_control(mincriterion = 0.99))
+
+#Print the decision tree
+print(ctree_model)
+```
+
+At the root node of the tree is closeness to LDA topic 2. This variable will help decide the class of popularity.
+
+Some important variables found to help determine whether an article will be popular are closeness to LDA topic 2 (statistic = 869.307), followed by whether the data channel is Entertainment (statistic = 736.054), whether the article was published on Saturday (statistic = 279.203), minimum shares of the average keyword (statistic = 216.583), whether the data channel is Social Media (statistic = 161.159), number of links (statistic = 149.883), whether the day the article was posted is Sunday (statistic = 113.296), average shares of the best keyword (statistic = 92.725), number of images (statistic = 58.131), and closeness to LDA topic 0 (statistic = 54.745).
+
+```{r }
+#Make a prediction on the test set.
+ctree_prediction <- predict(ctree_model, test)
+
+#Confusion Matrix and Statistics
+ctree_model_ConfusionMatrix_stats = confusionMatrix(ctree_prediction, test$shares_cat, mode = "everything", 
+                                                    positive = "1")
+print(ctree_model_ConfusionMatrix_stats)
+```
