@@ -217,7 +217,7 @@ gbm_predict2 <- predict.gbm(gbm_model2, newdata = test2, type = "response", n.tr
 gbm_predict_binary2 <- as.factor(ifelse(gbm_predict2 > 0.5, 1, 0))
 test2$shares_cat <- as.factor(test2$shares_cat)
 
-#Confusion Matrix and Stats
+#Confusion Matrix and Statistics
 gbm_ConfusionMatrix_stats2 <- confusionMatrix(gbm_predict_binary2, test2$shares_cat, positive = "1", 
                                               mode = "everything")
 print(gbm_ConfusionMatrix_stats2)
