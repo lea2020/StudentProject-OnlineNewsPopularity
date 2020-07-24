@@ -1,0 +1,441 @@
+---
+title: "FinalResults_01-DataProcessing"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Predicting Online News Popularity based on Pre-publication Features
+
+Final Results and Code
+
+Link to dataset: https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity
+
+Link to data: https://archive.ics.uci.edu/ml/machine-learning-databases/00332/OnlineNewsPopularity.zip
+
+
+Step 1 - Data Processing
+
+The “Online News Popularity Data Set” (Fernandes et al., 2015) is retrieved from the UCI Machine Learning Repository, and data processing procedures are implemented. At the start of the univariate analysis, the target variable is determined to be the number of shares; and articles are classified as popular or unpopular based on the number of shares. Various graphs are plotted such as boxplots and histograms to detect  outliers, illustrate whether the data is normally distributed, and whether the data is balanced. To determine whether there are any variables with low variance, a near-zero variance filter is used to filter out the attributes with near-zero variance and help to reduce the dimensionality of the dataset. In bivariate analysis, pairwise relations are examined between the input variables as well as the output and input variables. Scatterplots provide visualisations to better understand the data; and correlation analysis is done to help reduce the dimensionality of the dataset when there is high correlation among the independent variables.
+
+
+Initial Analysis - Univariate Analysis
+
+```{r }
+#Read the data
+temp <- tempfile()
+download.file("https://archive.ics.uci.edu/ml/machine-learning-databases/00332/OnlineNewsPopularity.zip",temp)
+pop <- read.table(unz(temp, "OnlineNewsPopularity/OnlineNewsPopularity.csv"), header = TRUE, sep = ",", 
+                  stringsAsFactors = FALSE, na.strings = c("", "NA"))
+unlink(temp)
+```
+```{r }
+#View the first few rows of the dataset
+head(pop)
+```
+
+```{r }
+#View the last few rows of the dataset
+tail(pop)
+```
+
+```{r }
+#Number of rows
+nrow(pop)
+```
+
+```{r }
+#Number of attributes
+length(pop)
+```
+
+```{r }
+#Data type of attributes
+sapply(pop, class)
+```
+
+The "shares" column is of type integer, "url" is of type character, and the remainder of the variables are of type numeric.
+
+
+```{r }
+#Structure of the dataset
+str(pop)
+```
+
+```{r }
+#Number of missing values
+sum(is.na(pop) == TRUE)
+```
+
+```{r }
+#Remove the non-predictive columns from the dataset
+pop_new <- pop[3:61]
+
+#Dimensions of the new dataset
+dim(pop_new)
+```
+
+Add a column that categorizes articles into binary levels of popularity according to the number of shares. If the number of shares is less than or equal to 1400, label the article as unpopular ("0"), whereas if the number of shares is greater than 1400, label the article as popular ("1").
+```{r }
+pop_new$shares_cat <- NA
+pop_new$shares_cat <- ifelse(pop_new$shares <= 1400, 0, 1)
+
+#Change categorical variables from numeric to factor
+pop_new$data_channel_is_lifestyle <- as.factor(pop_new$data_channel_is_lifestyle)
+pop_new$data_channel_is_entertainment <- as.factor(pop_new$data_channel_is_entertainment)
+pop_new$data_channel_is_bus <- as.factor(pop_new$data_channel_is_bus)
+pop_new$data_channel_is_socmed <- as.factor(pop_new$data_channel_is_socmed)
+pop_new$data_channel_is_tech <- as.factor(pop_new$data_channel_is_tech)
+pop_new$data_channel_is_world <- as.factor(pop_new$data_channel_is_world)
+pop_new$weekday_is_monday <- as.factor(pop_new$weekday_is_monday)
+pop_new$weekday_is_tuesday <- as.factor(pop_new$weekday_is_tuesday)
+pop_new$weekday_is_wednesday <- as.factor(pop_new$weekday_is_wednesday)
+pop_new$weekday_is_thursday <- as.factor(pop_new$weekday_is_thursday)
+pop_new$weekday_is_friday <- as.factor(pop_new$weekday_is_friday)
+pop_new$weekday_is_saturday <- as.factor(pop_new$weekday_is_saturday)
+pop_new$weekday_is_sunday <- as.factor(pop_new$weekday_is_sunday)
+pop_new$is_weekend <- as.factor(pop_new$is_weekend)
+pop_new$shares_cat <- as.factor(pop_new$shares_cat)
+
+#Check the structure of the new dataset
+str(pop_new)
+```
+
+```{r }
+#Five number summary for the numeric attributes; and levels and frequency tables for factors
+summary(pop_new)
+```
+
+Note the dataset is fairly balanced in terms of the popularity level of an article:
+0     1 
+20082 19562
+
+```{r }
+#Standard deviation for a selection of features
+sd(pop_new$n_tokens_title)
+#Standard deviation for the number of words in the title is 2.114037
+```
+
+```{r }
+sd(pop_new$n_tokens_content)
+#Standard deviation for the number of words in the content is 471.1075
+```
+
+```{r }
+sd(pop_new$num_hrefs)
+#Standard deviation for the number of links is 11.33202
+```
+
+```{r }
+sd(pop_new$num_self_hrefs)
+#Standard deviation for the number of links to other articles published by Mashable is 3.855141
+```
+
+```{r }
+sd(pop_new$num_imgs)
+#Standard deviation for the number of images is 8.309434
+```
+
+```{r }
+sd(pop_new$num_videos)
+#Standard deviation for the number of videos is 4.107855
+```
+
+```{r }
+sd(pop_new$num_keywords)
+#Standard deviation for the number of keywords in the metadata is 1.90913
+```
+
+```{r }
+sd(pop_new$shares)
+#Standard deviation for the number of shares is 11626.95
+```
+
+```{r }
+#Change categorical variables back to numeric to conduct further analysis
+pop_new$data_channel_is_lifestyle <- as.numeric(levels(pop_new$data_channel_is_lifestyle))[as.integer(pop_new$data_channel_is_lifestyle)]
+pop_new$data_channel_is_entertainment <- as.numeric(levels(pop_new$data_channel_is_entertainment))[as.integer(pop_new$data_channel_is_entertainment)]
+pop_new$data_channel_is_bus <- as.numeric(levels(pop_new$data_channel_is_bus))[as.integer(pop_new$data_channel_is_bus)]
+pop_new$data_channel_is_socmed <- as.numeric(levels(pop_new$data_channel_is_socmed))[as.integer(pop_new$data_channel_is_socmed)]
+pop_new$data_channel_is_tech <- as.numeric(levels(pop_new$data_channel_is_tech))[as.integer(pop_new$data_channel_is_tech)]
+pop_new$data_channel_is_world <- as.numeric(levels(pop_new$data_channel_is_world))[as.integer(pop_new$data_channel_is_world)]
+pop_new$weekday_is_monday <- as.numeric(levels(pop_new$weekday_is_monday))[as.integer(pop_new$weekday_is_monday)]
+pop_new$weekday_is_tuesday <- as.numeric(levels(pop_new$weekday_is_tuesday))[as.integer(pop_new$weekday_is_tuesday)]
+pop_new$weekday_is_wednesday <- as.numeric(levels(pop_new$weekday_is_wednesday))[as.integer(pop_new$weekday_is_wednesday)]
+pop_new$weekday_is_thursday <- as.numeric(levels(pop_new$weekday_is_thursday))[as.integer(pop_new$weekday_is_thursday)]
+pop_new$weekday_is_friday <- as.numeric(levels(pop_new$weekday_is_friday))[as.integer(pop_new$weekday_is_friday)]
+pop_new$weekday_is_saturday <- as.numeric(levels(pop_new$weekday_is_saturday))[as.integer(pop_new$weekday_is_saturday)]
+pop_new$weekday_is_sunday <- as.numeric(levels(pop_new$weekday_is_sunday))[as.integer(pop_new$weekday_is_sunday)]
+pop_new$is_weekend <- as.numeric(levels(pop_new$is_weekend))[as.integer(pop_new$is_weekend)]
+pop_new$shares_cat <- as.numeric(levels(pop_new$shares_cat))[as.integer(pop_new$shares_cat)]
+```
+
+Outliers - Boxplots
+
+```{r }
+#Number of shares
+boxplot(pop_new[c("shares")], xlab = "Number of Shares", ylab = "Count")
+```
+
+```{r }
+#Number of images and videos
+boxplot(pop_new[c("num_imgs", "num_videos")], names = c("Number of Images", "Number of Videos"), ylab = "Count")
+```
+
+```{r }
+#Number of Keywords; Number of Words in the Title; and Number of Words in the Content
+par(mfrow=c(1,3))
+boxplot(pop_new$num_keywords, xlab = "Number of Keywords", ylab = "Count")
+boxplot(pop_new$n_tokens_title, xlab = "Number of Words in the Title", ylab = "Count")
+boxplot(pop_new$n_tokens_content, xlab = "Number of Words in the Content", ylab = "Count")
+```
+
+Visualizing the data using boxplots shows that there are outliers present in the data.
+
+Distributions of input and output variables - Histograms
+
+```{r }
+#Popularity of an Article
+par(mfrow=c(1,1))
+hist(pop_new$shares_cat, xlab = "Popularity of an Article", ylab = "Count", breaks = c(-1,0,1), main = NULL, 
+     labels = c("Unpopular", "Popular"))
+```
+
+The dataset is fairly balanced between unpopular and popular articles.
+
+```{r }
+#Type of data channel that the article was published
+library(ggplot2)
+tab = data.frame(Count=colSums(pop_new[c("data_channel_is_lifestyle", "data_channel_is_entertainment", 
+                                           "data_channel_is_bus", "data_channel_is_socmed",
+                                           "data_channel_is_tech", "data_channel_is_world")]), 
+                 Channel = names(pop_new[c("data_channel_is_lifestyle", "data_channel_is_entertainment", 
+                                            "data_channel_is_bus", "data_channel_is_socmed",
+                                            "data_channel_is_tech", "data_channel_is_world")]))
+
+ggplot(data = tab, aes(x = Channel, y = Count)) +
+  geom_bar(stat = "identity") +
+  scale_x_discrete(breaks = c("data_channel_is_lifestyle", "data_channel_is_entertainment", 
+                              "data_channel_is_bus", "data_channel_is_socmed",
+                              "data_channel_is_tech", "data_channel_is_world"),
+                   labels = c("Lifestyle", "Entertainment", "Business", "Social Media",
+                              "Technology", "World"))
+```
+
+Most articles are published to "World" followed by "Technology," "Entertainment," "Business," "Social Media," and finally "Lifestyle."
+
+```{r }
+#Day of the Week that the article was published
+tab2 = data.frame(Count=colSums(pop_new[c("weekday_is_monday", "weekday_is_tuesday", 
+                                            "weekday_is_wednesday", "weekday_is_thursday",
+                                            "weekday_is_friday", "weekday_is_saturday",
+                                            "weekday_is_sunday")]),
+                  Day = names(pop_new[c("weekday_is_monday", "weekday_is_tuesday", 
+                                             "weekday_is_wednesday", "weekday_is_thursday",
+                                             "weekday_is_friday", "weekday_is_saturday",
+                                             "weekday_is_sunday")]))
+
+tab2$Day <- factor(tab2$Day, levels = c("weekday_is_monday", "weekday_is_tuesday", 
+                                                "weekday_is_wednesday", "weekday_is_thursday",
+                                                "weekday_is_friday", "weekday_is_saturday",
+                                                "weekday_is_sunday"))
+
+ggplot(data = tab2, aes(x = Day, y = Count)) +
+  geom_bar(stat = "identity") +
+  scale_x_discrete(breaks = c("weekday_is_monday", "weekday_is_tuesday", 
+                              "weekday_is_wednesday", "weekday_is_thursday",
+                              "weekday_is_friday", "weekday_is_saturday",
+                              "weekday_is_sunday"),
+                   labels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+                              "Saturday", "Sunday"))
+```
+
+Most articles are published on Wednesday, followed by Tuesday, Thursday, Monday, Friday, Sunday, and finally Saturday.
+
+Initial Analysis - Bivariate Analysis
+
+Pairwise Visualizations - Scatterplots
+```{r }
+#Scatterplots between Shares and Text Subjectivity, Text Sentiment Polarity, Title Subjectivity, Title Polarity
+par(mfrow = c(2,2))
+plot(pop_new$global_subjectivity, pop_new$shares, xlab = "Text Subjectivity", ylab = "Shares")
+plot(pop_new$global_sentiment_polarity, pop_new$shares, xlab = "Text Sentiment Polarity", ylab = "Shares")
+plot(pop_new$title_subjectivity, pop_new$shares, xlab = "Title Subjectivity", ylab = "Shares")
+plot(pop_new$title_sentiment_polarity, pop_new$shares, xlab = "Title Polarity", ylab = "Shares")
+```
+
+Shares tend to cluster around the center of the distribution suggesting that the most popular articles tend to be more neutral.
+
+```{r }
+#Scatterplot matrix
+par(mfrow=c(1,1))
+panel.cor <- function(x, y, digits=2, prefix="", cex.cor) 
+{
+  usr <- par("usr"); on.exit(par(usr)) 
+  par(usr = c(0, 1, 0, 1)) 
+  r <- abs(cor(x, y)) 
+  txt <- format(c(r, 0.123456789), digits=digits)[1] 
+  txt <- paste(prefix, txt, sep="") 
+  if(missing(cex.cor)) cex <- 0.8/strwidth(txt) 
+  
+  test <- cor.test(x,y) 
+  #borrowed from printCoefmat
+  Signif <- symnum(test$p.value, corr = FALSE, na = FALSE, 
+                   cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1),
+                   symbols = c("***", "**", "*", ".", " ")) 
+  
+  text(0.5, 0.5, txt, cex = cex * r) 
+  text(.8, .8, Signif, cex=cex, col=2) 
+}
+```
+
+Assign a value of Selected Features that represents the relevant columns of interest between Shares and Text Subjectivity, Text Sentiment Polarity, Title Subjectivity and Title Polarity.
+
+```{r }
+pop_new_Selected_Features <- pop_new[c("global_subjectivity", "global_sentiment_polarity",
+                                         "title_subjectivity", "title_sentiment_polarity", "shares")]
+
+#Show the results
+pairs(pop_new_Selected_Features, lower.panel=panel.smooth, upper.panel=panel.cor)
+```
+
+Low Variance Filter
+
+```{r }
+library(caret)
+```
+
+Near-zero variance may be applied to the data to ensure variables are used that help distinguish/determine the popularity of an article.
+
+Create a dataframe with predictor information including whether variables have one unique value, or have very few unique values compared to the number of samples, or whether the ratio of the frequency of the the most common value to the second most common value is large.
+```{r }
+nzv <- nearZeroVar(pop_new, saveMetrics= TRUE)
+print(nzv)
+```
+
+```{r }
+#Column names of the zero- or near-zero predictors
+nzv2 <- nearZeroVar(pop_new, names = TRUE)
+print(nzv2)
+#The results indicate one predictor - the minimum shares of the best keywords - has low variance.
+```
+
+```{r }
+#Return column index
+nzv3 <- nearZeroVar(pop_new)
+print(nzv3)
+```
+
+```{r }
+#Drop column with low variance
+filtered_pop <- pop_new[, -nzv3]
+
+#Dimensions of new data frame
+dim(filtered_pop)
+```
+
+Remove the number of shares since the analysis will focus on predicting the popularity of online news articles as a binary classification task.
+
+```{r }
+#Check the column names and remove the shares (integer) column
+names(filtered_pop)
+filtered_pop <- filtered_pop[-58]
+```
+
+Correlation Analysis
+
+```{r }
+library(corrplot)
+library(MASS)
+
+#Use Spearman correlation coefficient because the data is not normally distributed and has categorical variables
+pop_new_cor <- cor(filtered_pop, use = "complete.obs", method = "spearman")
+```
+
+Since the dataset has many variables, it may be informative to reduce the size of the correlation matrix.
+
+```{r }
+#Drop duplicate correlations
+pop_new_cor[lower.tri(pop_new_cor, diag=TRUE)] <- NA
+
+#Create a table
+pop_new_cor <- as.data.frame(as.table(pop_new_cor))
+
+#Remove NA values
+pop_new_cor <- na.omit(pop_new_cor)
+
+#Select the correlations that have at least moderate (moderate correlation > 0.4)
+pop_new_cor <- subset(pop_new_cor, abs(Freq) > 0.4)
+
+#Sort values by the highest correlation
+pop_new_cor <- pop_new_cor[order(-abs(pop_new_cor$Freq)), ]
+
+#Print the table
+print(pop_new_cor)
+```
+
+```{r }
+#Transform the table to a matrix to use corrplot
+matrix_cor <- reshape2::acast(pop_new_cor, Var1~Var2, value.var="Freq")
+
+#Plot the correlations
+corrplot(matrix_cor, method = c("circle"), is.corr = FALSE, tl.col="black", na.label=" ")
+```
+
+Remove strongly correlated attributes
+
+```{r }
+library(mlbench)
+
+#Calculate correlation
+pop_correlation <- cor(filtered_pop, method = "spearman")
+
+#Find attributes that are highly correlated (greater than 0.7 correlation coefficient) and sort them
+correlated <- findCorrelation(pop_correlation, cutoff=0.7)
+correlated <- sort(correlated)
+
+#Print the indexes of the highly correlated attributes
+print(correlated)
+```
+
+```{r }
+#Check the names of the correlated data
+correlated_pop = filtered_pop[,c(correlated)]
+names(correlated_pop)
+```
+
+There are 14 variables that may be removed due to being strongly correlated: number of words in the content, rate of unique words in the content, rate of non-stop words in the content, minimum shares of the worst keyword, average shares of the worst keyword, average shares of the average keyword, maximum shares of referenced articles in Mashable, average shares of referenced articles in Mashable, whether the article was published on the weekend, text sentiment polarity, rate of positive words among non-neutral tokens, rate of negative words among non-neutral tokens, minimum polarity of negative words, and absolute polarity level.
+
+```{r }
+#Reduce the data, not including variables that have high correlation
+reduced_pop = filtered_pop[,-c(correlated)]
+
+#Check the names of the remaining variables
+names(reduced_pop)
+#There are 44 remaining variables to be included in the analysis.
+```
+
+```{r }
+#Change the categorical variables back to factor to conduct exploratory analysis and dimensionality reduction
+reduced_pop$data_channel_is_lifestyle <- as.factor(reduced_pop$data_channel_is_lifestyle)
+reduced_pop$data_channel_is_entertainment <- as.factor(reduced_pop$data_channel_is_entertainment)
+reduced_pop$data_channel_is_bus <- as.factor(reduced_pop$data_channel_is_bus)
+reduced_pop$data_channel_is_socmed <- as.factor(reduced_pop$data_channel_is_socmed)
+reduced_pop$data_channel_is_tech <- as.factor(reduced_pop$data_channel_is_tech)
+reduced_pop$data_channel_is_world <- as.factor(reduced_pop$data_channel_is_world)
+reduced_pop$weekday_is_monday <- as.factor(reduced_pop$weekday_is_monday)
+reduced_pop$weekday_is_tuesday <- as.factor(reduced_pop$weekday_is_tuesday)
+reduced_pop$weekday_is_wednesday <- as.factor(reduced_pop$weekday_is_wednesday)
+reduced_pop$weekday_is_thursday <- as.factor(reduced_pop$weekday_is_thursday)
+reduced_pop$weekday_is_friday <- as.factor(reduced_pop$weekday_is_friday)
+reduced_pop$weekday_is_saturday <- as.factor(reduced_pop$weekday_is_saturday)
+reduced_pop$weekday_is_sunday <- as.factor(reduced_pop$weekday_is_sunday)
+reduced_pop$shares_cat <- as.factor(reduced_pop$shares_cat)
+```
+
+```{r }
+#Save the dataframe
+write.csv(reduced_pop, "reduced_pop.csv")
+```
