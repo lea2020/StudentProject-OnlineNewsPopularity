@@ -14,9 +14,11 @@ Final Results and Code
 
 Step 5 - Prediction & Step 6 - Performance Evaluation
 
-Prediction: Classification models - Logistic Regression, K-Nearest Neighbours, Decision Trees, Random Forest, and Gradient Boosting Machine - are tested to find the algorithm with the best accuracy. 
+Prediction: Classification models - Logistic Regression, K-Nearest Neighbours, Decision Trees, Random Forest, and Gradient Boosting Machine - are tested to find
+the algorithm with the best accuracy. 
 
-Performance Evaluation: At this stage, the machine learning algorithms that have been run are evaluated using various methods. Several metrics are computed including Accuracy, Precision, Recall/Sensitivity, Specificity, and F1, depending on the Confusion Matrix. 
+Performance Evaluation: At this stage, the machine learning algorithms that have been run are evaluated using various methods. Several metrics are computed
+including Accuracy, Precision, Recall/Sensitivity, Specificity, and F1, depending on the Confusion Matrix. 
 
 Note the results found are similar to what has been found in the literature.
 
@@ -143,7 +145,9 @@ valid.set2$data_channel_is_socmed <- as.numeric(levels(valid.set2$data_channel_i
 valid.set2$data_channel_is_entertainment <- as.numeric(levels(valid.set2$data_channel_is_entertainment))[as.integer(valid.set2$data_channel_is_entertainment)]
 ```
 
-Create a GBM model with the validation set using the best parameters. The final values found for the model were n.trees = 250, interaction.depth = 4, shrinkage = 0.1, and n.minobsinnode = 10 where n.trees is the number of trees, interaction.depth is is the maximum depth of each tree, shrinkage is the learning rate applied to each tree in the expansion, and n.minobsinnode is the number of observations in the terminal nodes of the trees.
+Create a GBM model with the validation set using the best parameters. The final values found for the model were n.trees = 250, interaction.depth = 4, shrinkage =
+0.1, and n.minobsinnode = 10 where n.trees is the number of trees, interaction.depth is is the maximum depth of each tree, shrinkage is the learning rate applied
+to each tree in the expansion, and n.minobsinnode is the number of observations in the terminal nodes of the trees.
 
 ```{r }
 set.seed(123)
