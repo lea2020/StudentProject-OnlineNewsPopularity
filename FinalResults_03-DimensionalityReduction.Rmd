@@ -14,7 +14,8 @@ Final Results and Code
 
 Step 3 - Dimensionality Reduction
 
-The Random Forest feature selection method, which uses the Gini index to assign a score and rank features, may be used to help select the features to be used in the analysis.
+The Random Forest feature selection method, which uses the Gini index to assign a score and rank features, may be used to help select the features to be used in
+the analysis.
 
 ```{r }
 #Reload the data
@@ -79,7 +80,9 @@ imp_class.sort$predictors <- factor(imp_class.sort$predictors,levels=imp_class.s
 print(imp_class.sort)
 ```
 
-Some of the top predictors in terms of Mean Decrease in Accuracy include maximum shares of the average keyword, minimum shares of referenced articles in Mashable, minimum shares of the average keyword, closeness to LDA topic 2, closeness to LDA topic 0, whether the article was published on Saturday, closeness to LDA topic 4, whether the data channel is Entertainment, whether the data channel is Social Media, and closeness to LDA topic 1.
+Some of the top predictors in terms of Mean Decrease in Accuracy include maximum shares of the average keyword, minimum shares of referenced articles in Mashable,
+minimum shares of the average keyword, closeness to LDA topic 2, closeness to LDA topic 0, whether the article was published on Saturday, closeness to LDA topic 4,
+whether the data channel is Entertainment, whether the data channel is Social Media, and closeness to LDA topic 1.
 
 Note about LDA topics: Natural language features were extracted from the Mashable news service using the Latent 
 Dirichlet Allocation algorithm which were applied to Mashable texts before publication to identify the top five 
@@ -94,7 +97,9 @@ imp_gini.sort$predictors <- factor(imp_gini.sort$predictors,levels=imp_gini.sort
 print(imp_gini.sort)
 ```
 
-Some of the top predictors in terms of Mean Decrease in Gini include maximum shares of the average keyword, minimum shares of referenced articles in Mashable, closeness to LDA topic 2, average shares of the best keyword, closeness to LDA topic 1, rate of unique non-stop words in the content,  closeness to LDA topic 4, closeness to LDA topic 0, text subjectivity, and maximum shares of the worst keyword.
+Some of the top predictors in terms of Mean Decrease in Gini include maximum shares of the average keyword, minimum shares of referenced articles in Mashable,
+closeness to LDA topic 2, average shares of the best keyword, closeness to LDA topic 1, rate of unique non-stop words in the content,  closeness to LDA topic 4,
+closeness to LDA topic 0, text subjectivity, and maximum shares of the worst keyword.
 
 Plot Important Variables
 ```{r }
