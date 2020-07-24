@@ -14,7 +14,8 @@ Final Results and Code
 
 Step 2 - Exploratory Analysis
 
-Normalization is applied to the dataset to scale the values of the features. Next, the data may be explored by checking subsequences using association rules to find any patterns that may explain what makes an article popular, and learn its characteristics, without making predictions yet.
+Normalization is applied to the dataset to scale the values of the features. Next, the data may be explored by checking subsequences using association rules to
+find any patterns that may explain what makes an article popular, and learn its characteristics, without making predictions yet.
 
 ```{r }
 #Reload the data
@@ -116,7 +117,9 @@ itemFrequencyPlot(transaction_object, topN=20, type="relative", col=brewer.pal(8
                   main="Relative Item Frequency Plot")
 ```
 
-Some of the most frequently occurring items are maximum shares of the best keyword followed by whether the data channel is not Lifestyle, not Social Media, whether the article was not published on Saturday, not published on Sunday, not Entertainment, not published on Friday, not World, not Business, and not published on Monday.
+Some of the most frequently occurring items are maximum shares of the best keyword followed by whether the data channel is not Lifestyle, not Social Media, whether
+the article was not published on Saturday, not published on Sunday, not Entertainment, not published on Friday, not World, not Business, and not published on
+Monday.
 
 ```{r }
 #Create association rules using the apriori algorithm
@@ -141,15 +144,20 @@ inspect(rules_lift[1:30])
 
 Some interesting rules found that may help determine whether an article will be popular include:
 
-51% of the transactions show that 91% of popular articles with the number of videos between 0 and the bottom 1% of the distribution, maximum shares of the best keyword, and not published on Sunday (or Saturday), are also not entertainment.
+51% of the transactions show that 91% of popular articles with the number of videos between 0 and the bottom 1% of the distribution, maximum shares of the best
+keyword, and not published on Sunday (or Saturday), are also not entertainment.
 
-50-52% of the transactions show that 90% of popular articles with the number of videos between 0 and the bottom 1% of the distribution, maximum shares of the best keyword, and not social media (or lifestyle), are also not entertainment.
+50-52% of the transactions show that 90% of popular articles with the number of videos between 0 and the bottom 1% of the distribution, maximum shares of the best
+keyword, and not social media (or lifestyle), are also not entertainment.
 
-51% of the transactions show that 95% of popular articles with maximum shares of the best keyword, with the top 90% of the minimum polarity of positive words, and not published on Saturday (or Sunday), are also not social media.
+51% of the transactions show that 95% of popular articles with maximum shares of the best keyword, with the top 90% of the minimum polarity of positive words, and
+not published on Saturday (or Sunday), are also not social media.
 
-52% of the transactions show that 95% of popular articles with maximum shares of the best keyword, with the top 90% of the minimum polarity of positive words, and not lifestyle, are also not social media.
+52% of the transactions show that 95% of popular articles with maximum shares of the best keyword, with the top 90% of the minimum polarity of positive words, and
+not lifestyle, are also not social media.
 
-50% of transactions show that 92% of popular articles with maximum shares of the best keyword, absolute subjectivity level in the top 53% of the distribution, and not lifestyle, or entertainment, are also not published on Sunday.
+50% of transactions show that 92% of popular articles with maximum shares of the best keyword, absolute subjectivity level in the top 53% of the distribution, and
+not lifestyle, or entertainment, are also not published on Sunday.
 
 ```{r }
 #Plot the rules
