@@ -14,9 +14,11 @@ Final Results and Code
 
 Step 5 - Prediction & Step 6 - Performance Evaluation
 
-Prediction: Classification models - Logistic Regression, K-Nearest Neighbours, Decision Trees, Random Forest, and Gradient Boosting Machine - are tested to find the algorithm with the best accuracy. 
+Prediction: Classification models - Logistic Regression, K-Nearest Neighbours, Decision Trees, Random Forest, and Gradient Boosting Machine - are tested to find
+the algorithm with the best accuracy. 
 
-Performance Evaluation: At this stage, the machine learning algorithms that have been run are evaluated using various methods. Several metrics are computed including Accuracy, Precision, Recall/Sensitivity, Specificity, and F1, depending on the Confusion Matrix. 
+Performance Evaluation: At this stage, the machine learning algorithms that have been run are evaluated using various methods. Several metrics are computed
+including Accuracy, Precision, Recall/Sensitivity, Specificity, and F1, depending on the Confusion Matrix. 
 
 Note the results found are similar to what has been found in the literature.
 
@@ -132,7 +134,11 @@ print(ctree_model)
 
 At the root node of the tree is closeness to LDA topic 2. This variable will help decide the class of popularity.
 
-Some important variables found to help determine whether an article will be popular are closeness to LDA topic 2 (statistic = 869.307), followed by whether the data channel is Entertainment (statistic = 736.054), whether the article was published on Saturday (statistic = 279.203), minimum shares of the average keyword (statistic = 216.583), whether the data channel is Social Media (statistic = 161.159), number of links (statistic = 149.883), whether the day the article was posted is Sunday (statistic = 113.296), average shares of the best keyword (statistic = 92.725), number of images (statistic = 58.131), and closeness to LDA topic 0 (statistic = 54.745).
+Some important variables found to help determine whether an article will be popular are closeness to LDA topic 2 (statistic = 869.307), followed by whether the
+data channel is Entertainment (statistic = 736.054), whether the article was published on Saturday (statistic = 279.203), minimum shares of the average keyword
+(statistic = 216.583), whether the data channel is Social Media (statistic = 161.159), number of links (statistic = 149.883), whether the day the article was
+posted is Sunday (statistic = 113.296), average shares of the best keyword (statistic = 92.725), number of images (statistic = 58.131), and closeness to LDA topic
+0 (statistic = 54.745).
 
 ```{r }
 #Make a prediction on the test set.
