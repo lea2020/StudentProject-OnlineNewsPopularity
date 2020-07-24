@@ -18,7 +18,13 @@ Link to data: https://archive.ics.uci.edu/ml/machine-learning-databases/00332/On
 
 Step 1 - Data Processing
 
-The “Online News Popularity Data Set” (Fernandes et al., 2015) is retrieved from the UCI Machine Learning Repository, and data processing procedures are implemented. At the start of the univariate analysis, the target variable is determined to be the number of shares; and articles are classified as popular or unpopular based on the number of shares. Various graphs are plotted such as boxplots and histograms to detect  outliers, illustrate whether the data is normally distributed, and whether the data is balanced. To determine whether there are any variables with low variance, a near-zero variance filter is used to filter out the attributes with near-zero variance and help to reduce the dimensionality of the dataset. In bivariate analysis, pairwise relations are examined between the input variables as well as the output and input variables. Scatterplots provide visualisations to better understand the data; and correlation analysis is done to help reduce the dimensionality of the dataset when there is high correlation among the independent variables.
+The “Online News Popularity Data Set” (Fernandes et al., 2015) is retrieved from the UCI Machine Learning Repository, and data processing procedures are
+implemented. At the start of the univariate analysis, the target variable is determined to be the number of shares; and articles are classified as popular or
+unpopular based on the number of shares. Various graphs are plotted such as boxplots and histograms to detect  outliers, illustrate whether the data is normally
+distributed, and whether the data is balanced. To determine whether there are any variables with low variance, a near-zero variance filter is used to filter out
+the attributes with near-zero variance and help to reduce the dimensionality of the dataset. In bivariate analysis, pairwise relations are examined between the 
+input variables as well as the output and input variables. Scatterplots provide visualisations to better understand the data; and correlation analysis is done to
+help reduce the dimensionality of the dataset when there is high correlation among the independent variables.
 
 
 Initial Analysis - Univariate Analysis
@@ -77,7 +83,8 @@ pop_new <- pop[3:61]
 dim(pop_new)
 ```
 
-Add a column that categorizes articles into binary levels of popularity according to the number of shares. If the number of shares is less than or equal to 1400, label the article as unpopular (0), whereas if the number of shares is greater than 1400, label the article as popular (1).
+Add a column that categorizes articles into binary levels of popularity according to the number of shares. If the number of shares is less than or equal to 1400,
+label the article as unpopular (0), whereas if the number of shares is greater than 1400, label the article as popular (1).
 ```{r }
 pop_new$shares_cat <- NA
 pop_new$shares_cat <- ifelse(pop_new$shares <= 1400, 0, 1)
@@ -289,7 +296,8 @@ panel.cor <- function(x, y, digits=2, prefix="", cex.cor)
 }
 ```
 
-Assign a value of Selected Features that represents the relevant columns of interest between Shares and Text Subjectivity, Text Sentiment Polarity, Title Subjectivity and Title Polarity.
+Assign a value of Selected Features that represents the relevant columns of interest between Shares and Text Subjectivity, Text Sentiment Polarity, Title
+Subjectivity and Title Polarity.
 
 ```{r }
 pop_new_Selected_Features <- pop_new[c("global_subjectivity", "global_sentiment_polarity",
@@ -307,7 +315,8 @@ library(caret)
 
 Near-zero variance may be applied to the data to ensure variables are used that help distinguish/determine the popularity of an article.
 
-Create a dataframe with predictor information including whether variables have one unique value, or have very few unique values compared to the number of samples, or whether the ratio of the frequency of the the most common value to the second most common value is large.
+Create a dataframe with predictor information including whether variables have one unique value, or have very few unique values compared to the number of samples,
+or whether the ratio of the frequency of the the most common value to the second most common value is large.
 ```{r }
 nzv <- nearZeroVar(pop_new, saveMetrics= TRUE)
 print(nzv)
@@ -404,7 +413,10 @@ correlated_pop = filtered_pop[,c(correlated)]
 names(correlated_pop)
 ```
 
-There are 14 variables that may be removed due to being strongly correlated: number of words in the content, rate of unique words in the content, rate of non-stop words in the content, minimum shares of the worst keyword, average shares of the worst keyword, average shares of the average keyword, maximum shares of referenced articles in Mashable, average shares of referenced articles in Mashable, whether the article was published on the weekend, text sentiment polarity, rate of positive words among non-neutral tokens, rate of negative words among non-neutral tokens, minimum polarity of negative words, and absolute polarity level.
+There are 14 variables that may be removed due to being strongly correlated: number of words in the content, rate of unique words in the content, rate of non-stop
+words in the content, minimum shares of the worst keyword, average shares of the worst keyword, average shares of the average keyword, maximum shares of referenced
+articles in Mashable, average shares of referenced articles in Mashable, whether the article was published on the weekend, text sentiment polarity, rate of
+positive words among non-neutral tokens, rate of negative words among non-neutral tokens, minimum polarity of negative words, and absolute polarity level.
 
 ```{r }
 #Reduce the data, not including variables that have high correlation
