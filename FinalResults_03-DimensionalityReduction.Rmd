@@ -1,0 +1,148 @@
+---
+title: "FinalResults_03-DimensionalityReduction"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Predicting Online News Popularity based on Pre-publication Features
+
+Final Results and Code
+
+
+Step 3 - Dimensionality Reduction
+
+The Random Forest feature selection method, which uses the Gini index to assign a score and rank features, may be used to help select the features to be used in the analysis.
+
+```{r }
+#Reload the data
+pop_norm <- read.csv(file = "pop_norm.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                        na.strings = c("", "NA"))
+
+#Remove the index column
+pop_norm <- pop_norm[2:45]
+```
+
+```{r }
+#Change the categorical variables back to factor to conduct dimensionality reduction
+pop_norm$data_channel_is_lifestyle <- as.factor(pop_norm$data_channel_is_lifestyle)
+pop_norm$data_channel_is_entertainment <- as.factor(pop_norm$data_channel_is_entertainment)
+pop_norm$data_channel_is_bus <- as.factor(pop_norm$data_channel_is_bus)
+pop_norm$data_channel_is_socmed <- as.factor(pop_norm$data_channel_is_socmed)
+pop_norm$data_channel_is_tech <- as.factor(pop_norm$data_channel_is_tech)
+pop_norm$data_channel_is_world <- as.factor(pop_norm$data_channel_is_world)
+pop_norm$weekday_is_monday <- as.factor(pop_norm$weekday_is_monday)
+pop_norm$weekday_is_tuesday <- as.factor(pop_norm$weekday_is_tuesday)
+pop_norm$weekday_is_wednesday <- as.factor(pop_norm$weekday_is_wednesday)
+pop_norm$weekday_is_thursday <- as.factor(pop_norm$weekday_is_thursday)
+pop_norm$weekday_is_friday <- as.factor(pop_norm$weekday_is_friday)
+pop_norm$weekday_is_saturday <- as.factor(pop_norm$weekday_is_saturday)
+pop_norm$weekday_is_sunday <- as.factor(pop_norm$weekday_is_sunday)
+pop_norm$shares_cat <- as.factor(pop_norm$shares_cat)
+```
+
+```{r }
+#Feature selection with Random Forest
+library(randomForest)
+
+#Train Random Forest
+set.seed(123)
+rf_class <- randomForest(shares_cat ~., data=pop_norm, importance=TRUE)
+print(rf_class)
+```
+
+```{r }
+#Plot the results that show the change in errors as the number of trees increases
+plot(rf_class)
+```
+
+```{r }
+#Evaluate variable importance according to mean decrease in accuracy and mean decrease in gini
+#Mean Decrease in Accuracy
+set.seed(123)
+imp_class = importance(rf_class, type=1)
+imp_class <- data.frame(predictors=rownames(imp_class),imp_class)
+
+#Mean Decrease Gini
+set.seed(123)
+imp_gini = importance(rf_class, type=2)
+imp_gini <- data.frame(predictors=rownames(imp_gini),imp_gini)
+
+#Order the predictors by importance according to Mean Decrease in Accuracy
+library(dplyr)
+imp_class.sort <- arrange(imp_class, desc(MeanDecreaseAccuracy))
+imp_class.sort$predictors <- factor(imp_class.sort$predictors,levels=imp_class.sort$predictors)
+
+#Check the importance of the predictors sorted by Mean Decrease in Accuracy
+print(imp_class.sort)
+```
+
+Some of the top predictors in terms of Mean Decrease in Accuracy include maximum shares of the average keyword, minimum shares of referenced articles in Mashable, minimum shares of the average keyword, closeness to LDA topic 2, closeness to LDA topic 0, whether the article was published on Saturday, closeness to LDA topic 4, whether the data channel is Entertainment, whether the data channel is Social Media, and closeness to LDA topic 1.
+
+Note about LDA topics: Natural language features were extracted from the Mashable news service using the Latent 
+Dirichlet Allocation algorithm which were applied to Mashable texts before publication to identify the top five 
+relevant topics and measure the closeness of the current article to those topics.
+
+```{r }
+#Order the predictors by importance according to Mean Decrease in Gini
+imp_gini.sort <- arrange(imp_gini, desc(imp_gini$MeanDecreaseGini))
+imp_gini.sort$predictors <- factor(imp_gini.sort$predictors,levels=imp_gini.sort$predictors)
+
+#Check the predictors sorted by Mean Decrease in Gini
+print(imp_gini.sort)
+```
+
+Some of the top predictors in terms of Mean Decrease in Gini include maximum shares of the average keyword, minimum shares of referenced articles in Mashable, closeness to LDA topic 2, average shares of the best keyword, closeness to LDA topic 1, rate of unique non-stop words in the content,  closeness to LDA topic 4, closeness to LDA topic 0, text subjectivity, and maximum shares of the worst keyword.
+
+Plot Important Variables
+```{r }
+set.seed(123)
+varImpPlot(rf_class, type=1, main = "Variable Importance (Mean Decrease in Accuracy)")
+```
+
+```{r }
+set.seed(123)
+varImpPlot(rf_class, type=2, main = "Variable Importance (Mean Decrease in Gini)")
+```
+
+```{r }
+#Select the top predictors
+imp_class.top <- imp_class.sort[1:20,]
+imp_gini.top <- imp_gini.sort[1:20,]
+
+#Print the top predictors according to Mean Decrease in Accuarcy
+print(imp_class.top)
+```
+
+```{r }
+#Print the top predictors in terms of Mean Decrease in Gini
+print(imp_gini.top)
+```
+
+```{r }
+#Subset the data with the required independent and dependent variables
+#The top variables based on the mean decrease in accuracy and mean decrease in gini are kept for the model.
+pop_norm_subset <- pop_norm[,c("kw_max_avg", "self_reference_min_shares", "kw_min_avg", "LDA_02", "LDA_00", 
+                               "weekday_is_saturday", "LDA_04", "data_channel_is_entertainment",
+                               "data_channel_is_socmed", "LDA_01", "kw_avg_max", "kw_max_max",  
+                               "n_non_stop_unique_tokens", "num_imgs", "LDA_03", "average_token_length",
+                               "num_hrefs", "global_rate_positive_words", "global_subjectivity",
+                               "weekday_is_sunday", "kw_max_min", "global_rate_negative_words", 
+                               "avg_positive_polarity", "avg_negative_polarity", "n_tokens_title", 
+                               "title_sentiment_polarity", "shares_cat")]
+
+#Structure of the dataset to be used for predictive analysis
+str(pop_norm_subset)
+```
+
+```{r }
+#Check the five number summary for numeric variables, and levels and frequency tables for factor variables
+summary(pop_norm_subset)
+```
+
+```{r }
+#Save the dataframe
+write.csv(pop_norm_subset, "pop_norm_subset.csv")
+```
