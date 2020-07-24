@@ -1,0 +1,143 @@
+---
+title: "FinalResults_05-Prediction_Evaluation-02-K-NearestNeighbours"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Predicting Online News Popularity based on Pre-publication Features
+
+Final Results and Code
+
+
+Step 5 - Prediction & Step 6 - Performance Evaluation
+
+Prediction: Classification models - Logistic Regression, K-Nearest Neighbours, Decision Trees, Random Forest, and Gradient Boosting Machine - are tested to find the algorithm with the best accuracy. 
+
+Performance Evaluation: At this stage, the machine learning algorithms that have been run are evaluated using various methods. Several metrics are computed including Accuracy, Precision, Recall/Sensitivity, Specificity, and F1, depending on the Confusion Matrix. 
+
+Note the results found are similar to what has been found in the literature.
+
+
+K-Nearest Neighbours
+
+```{r }
+#Reload the data
+train.set <- read.csv(file = "trainset.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                      na.strings = c("", "NA"))
+
+valid.set <- read.csv(file = "validset.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                      na.strings = c("", "NA"))
+
+test.set <- read.csv(file = "testset.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                     na.strings = c("", "NA"))
+
+train <- read.csv(file = "train.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                  na.strings = c("", "NA"))
+
+test <- read.csv(file = "test.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE, 
+                 na.strings = c("", "NA"))
+
+#Remove the index column
+train.set <- train.set[2:28]
+valid.set <- valid.set[2:28]
+test.set <- test.set[2:28]
+train <- train[2:28]
+test <- test[2:28]
+```
+
+```{r }
+#Change the categorical variables back to factor to conduct model training and testing
+train.set$data_channel_is_entertainment <- as.factor(train.set$data_channel_is_entertainment)
+train.set$data_channel_is_socmed <- as.factor(train.set$data_channel_is_socmed)
+train.set$weekday_is_saturday <- as.factor(train.set$weekday_is_saturday)
+train.set$weekday_is_sunday <- as.factor(train.set$weekday_is_sunday)
+train.set$shares_cat <- as.factor(train.set$shares_cat)
+
+valid.set$data_channel_is_entertainment <- as.factor(valid.set$data_channel_is_entertainment)
+valid.set$data_channel_is_socmed <- as.factor(valid.set$data_channel_is_socmed)
+valid.set$weekday_is_saturday <- as.factor(valid.set$weekday_is_saturday)
+valid.set$weekday_is_sunday <- as.factor(valid.set$weekday_is_sunday)
+valid.set$shares_cat <- as.factor(valid.set$shares_cat)
+
+test.set$data_channel_is_entertainment <- as.factor(test.set$data_channel_is_entertainment)
+test.set$data_channel_is_socmed <- as.factor(test.set$data_channel_is_socmed)
+test.set$weekday_is_saturday <- as.factor(test.set$weekday_is_saturday)
+test.set$weekday_is_sunday <- as.factor(test.set$weekday_is_sunday)
+test.set$shares_cat <- as.factor(test.set$shares_cat)
+
+train$data_channel_is_entertainment <- as.factor(train$data_channel_is_entertainment)
+train$data_channel_is_socmed <- as.factor(train$data_channel_is_socmed)
+train$weekday_is_saturday <- as.factor(train$weekday_is_saturday)
+train$weekday_is_sunday <- as.factor(train$weekday_is_sunday)
+train$shares_cat <- as.factor(train$shares_cat)
+
+test$data_channel_is_entertainment <- as.factor(test$data_channel_is_entertainment)
+test$data_channel_is_socmed <- as.factor(test$data_channel_is_socmed)
+test$weekday_is_saturday <- as.factor(test$weekday_is_saturday)
+test$weekday_is_sunday <- as.factor(test$weekday_is_sunday)
+test$shares_cat <- as.factor(test$shares_cat)
+```
+
+```{r }
+library("class")
+#install.packages("gmodels")
+library("gmodels")
+
+#Remove the share categories column from the training and test datasets
+train.set_new <- train.set[-27]
+test.set_new <- test.set[-27]
+valid.set_new <- valid.set[-27]
+
+train_new <- train[-27]
+test_new <- test[-27]
+
+#Store the labels
+train.set_labels <- train.set$shares_cat
+test.set_labels <- test.set$shares_cat
+valid.set_labels <- valid.set$shares_cat
+
+train_labels <- train$shares_cat
+test_labels <- test$shares_cat
+```
+
+```{r }
+#Tune the model for different levels of k (number of neighbours)
+library(caret)
+set.seed(123)
+knnfit <- train(x = train.set_new, y = train.set_labels, method = "knn", tuneLength = 10, 
+                trControl = trainControl(method = "cv", search = "grid"))
+
+#Print the training model to see the accuracy
+print(knnfit)
+```
+
+```{r }
+#Plot the results
+plot(knnfit)
+#The most accurate predictions are made at k = 23
+```
+
+```{r }
+#Validate and test the model with k = 23
+knn_prediction <- knn(train = valid.set_new, test = test.set_new, cl= valid.set_labels, k = 23)
+
+#Confusion Matrix and Statistics
+knn_ConfusionMatrix_stats = confusionMatrix(knn_prediction, test.set_labels, mode = "everything", positive = "1")
+print(knn_ConfusionMatrix_stats)
+```
+
+
+Using 10-fold Cross-Validation
+
+```{r }
+#For k = 23, make a prediction on the test set.
+knn_prediction2 <- knn(train = train_new, test = test_new, cl= train_labels, k = 23)
+
+#Confusion Matrix and Statistics
+library(caret)
+knn_ConfusionMatrix_stats2 = confusionMatrix(knn_prediction2, test_labels, mode = "everything", positive = "1")
+print(knn_ConfusionMatrix_stats2)
+```
