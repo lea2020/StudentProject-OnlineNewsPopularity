@@ -14,9 +14,11 @@ Final Results and Code
 
 Step 5 - Prediction & Step 6 - Performance Evaluation
 
-Prediction: Classification models - Logistic Regression, K-Nearest Neighbours, Decision Trees, Random Forest, and Gradient Boosting Machine - are tested to find the algorithm with the best accuracy. 
+Prediction: Classification models - Logistic Regression, K-Nearest Neighbours, Decision Trees, Random Forest, and Gradient Boosting Machine - are tested to find
+the algorithm with the best accuracy. 
 
-Performance Evaluation: At this stage, the machine learning algorithms that have been run are evaluated using various methods. Several metrics are computed including Accuracy, Precision, Recall/Sensitivity, Specificity, and F1, depending on the Confusion Matrix. 
+Performance Evaluation: At this stage, the machine learning algorithms that have been run are evaluated using various methods. Several metrics are computed
+including Accuracy, Precision, Recall/Sensitivity, Specificity, and F1, depending on the Confusion Matrix. 
 
 Note the results found are similar to what has been found in the literature.
 
@@ -91,12 +93,16 @@ glm_model <- glm(shares_cat ~ ., family = binomial(link='logit'), data = train)
 summary(glm_model)
 ```
 
-The coefficients of the predictors indicate that every one unit change in the independent variable produces a specific unit change in the log odds of the dependent variable i.e. the log odds of an article being popular.
-The largest impact is from the rate of unique non-stop words in the content, followed by closeness to LDA topics 0, 4, 3, 1, and 2 which all have a negative relationship with the log odds of an article being popular.
+The coefficients of the predictors indicate that every one unit change in the independent variable produces a specific unit change in the log odds of the dependent
+variable i.e. the log odds of an article being popular.
+The largest impact is from the rate of unique non-stop words in the content, followed by closeness to LDA topics 0, 4, 3, 1, and 2 which all have a negative
+relationship with the log odds of an article being popular.
 
-Most of the estimates are statistically significant and the model produces the following relationship between the log odds of popularity and the predictors (i.e. the independent variables that have a significant effect on the dependent variable):
+Most of the estimates are statistically significant and the model produces the following relationship between the log odds of popularity and the predictors (i.e.
+the independent variables that have a significant effect on the dependent variable):
 
-logit(p) = 601.45 + 7.81(maximum shares of average keyword) + 6.38(minimum shares of referenced articles in                    Mashable) - 557.22(closeness to LDA topic 0) + 0.42(minimum shares of the average keyword)
+logit(p) = 601.45 + 7.81(maximum shares of average keyword) + 6.38(minimum shares of referenced articles in                    
+           Mashable) - 557.22(closeness to LDA topic 0) + 0.42(minimum shares of the average keyword)
            - 554.06(closeness to LDA topic 2) + 0.94(article published on Saturday)
            - 557.2(closeness to LDA topic 4) + 0.82(data channel is social media)
            - 0.57(data channel is entertainment) - 556.97(closeness to LDA topic 1)
