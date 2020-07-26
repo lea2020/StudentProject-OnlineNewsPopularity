@@ -11,11 +11,11 @@ Due to the large number of news articles published online, predicting the popula
 
 The “Online News Popularity Data Set” (Fernandes et al., 2015) is retrieved from the UCI Machine Learning Repository, and data processing procedures are implemented. At the start of the univariate analysis, the target variable is determined to be the number of shares; and articles are classified as popular or unpopular based on the number of shares. Various graphs are plotted such as boxplots and histograms to detect outliers, illustrate whether the data is normally distributed, and whether the data is balanced. To determine whether there are any variables with low variance, a near-zero variance filter is used to filter out the attributes with near-zero variance and help to reduce the dimensionality of the dataset. In bivariate analysis, pairwise relations are examined between the input variables as well as the output and input variables. Scatterplots provide visualisations to better understand the data; and correlation analysis is done to help reduce the dimensionality of the dataset when there is high correlation among the independent variables.
 
+#### Source code: https://github.com/lea2020/StudentProject-PredictingOnlineNewsPopularity/blob/master/FinalResults_01-DataProcessing.Rmd
+
 #### Dataset: https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity
 
 #### Data: https://archive.ics.uci.edu/ml/machine-learning-databases/00332/OnlineNewsPopularity.zip
-
-#### Source code: https://github.com/lea2020/StudentProject-PredictingOnlineNewsPopularity/blob/master/FinalResults_01-DataProcessing.Rmd
 
 
 ### Step 2: Exploratory Analysis
