@@ -60,7 +60,7 @@ Gradient Boosting Machines: https://github.com/lea2020/StudentProject-Predicting
 
 At this stage, the machine learning algorithms that have been run are evaluated using various methods. Several metrics are computed including Accuracy, Precision, Recall/Sensitivity, Specificity, and F1 score, depending on the Confusion Matrix.
 
-#### Source code (see code after Prediction for Confusion Matrix and Statistics):
+#### Source code:
 
 Logistic Regression: https://github.com/lea2020/StudentProject-PredictingOnlineNewsPopularity/blob/master/FinalResults_05-Prediction_Evaluation-01-LogisticRegression.Rmd
 
